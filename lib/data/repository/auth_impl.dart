@@ -1,6 +1,7 @@
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:lets_connect/domain/model/user.dart';
 import 'package:lets_connect/domain/repository/auth.dart';
 import '../../domain/listener.dart';
 
@@ -33,14 +34,29 @@ class AuthImpl extends AuthRepository {
   }
 
   @override
-  Future<void> signInWithEmailAndPassword(String email, String password, DataListener listener) async {
+  Future<UserData?> signInWithEmailAndPassword(String email, String password, DataListener listener) async {
     listener.onStarted();
     try {
-      await _auth.signInWithEmailAndPassword(email: email, password: password);
-      listener.onSuccess();
+      final userCredential = await _auth.signInWithEmailAndPassword(email: email, password: password);
+      final user = userCredential.user;
+      if(user != null) {
+        final querySnapshot = await _firestore.collection('users').doc(user.uid).get();
+        final userData = querySnapshot.data();
+        final userDetail = UserData(
+            uid: user.uid,
+            fullname: userData?['fullname'],
+            email: userData?['email'],
+            createdate: userData?['createdate']
+        );
+        listener.onSuccess();
+        return userDetail;
+      } else {
+        listener.onFailure('User not found.');
+      }
     } catch(e) {
       listener.onFailure(e.toString());
     }
+    return null;
   }
 
   @override

@@ -4,8 +4,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:lets_connect/data/repository/user_impl.dart';
 import 'package:lets_connect/domain/model/user.dart';
 import 'package:lets_connect/domain/repository/auth.dart';
+import 'package:lets_connect/domain/repository/call.dart';
 import '../../domain/repository/user.dart';
 import 'auth_impl.dart';
+import 'call_impl.dart';
 
 final authProvider = Provider<FirebaseAuth>((ref) => FirebaseAuth.instance);
 
@@ -14,6 +16,11 @@ final firestoreProvider = Provider<FirebaseFirestore>((ref) => FirebaseFirestore
 final usersProvider = Provider<UserRepository>((ref) {
   final firestore = ref.watch(firestoreProvider);
   return UserImpl(firestore);
+});
+
+final callProvider = Provider<CallRepository>((ref) {
+  final firestore = ref.watch(firestoreProvider);
+  return CallImpl(firestore);
 });
 
 final authStateChangesProvider = StreamProvider<User?>((ref) {

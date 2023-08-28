@@ -6,17 +6,19 @@ extension ContextExtentions on BuildContext {
         context: this,
         barrierDismissible: false,
         builder: (context) {
-          return const Dialog(
+          return Dialog(
             backgroundColor: Colors.transparent,
             elevation: 0,
-            child: Padding(
-              padding: EdgeInsets.all(10.0),
-              child: Center(
-                child: SizedBox(
-                  height: 100,
-                  width: 100,
-                  child: CircularProgressIndicator(),
-                ),
+            child: Container(
+              height: 80,
+              width: 80,
+              padding: const EdgeInsets.all(10.0),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: const Center(
+                child: CircularProgressIndicator(),
               ),
             ),
           );

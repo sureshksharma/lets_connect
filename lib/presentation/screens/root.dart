@@ -4,15 +4,9 @@ import 'package:go_router/go_router.dart';
 class RootLayout extends StatelessWidget {
   const RootLayout(
       {super.key,
-      required this.child,
-      required this.navigationIndex,
-      required this.onDestination,
-      required this.destinations});
+      required this.child});
 
   final Widget child;
-  final int navigationIndex;
-  final ValueChanged<int> onDestination;
-  final List<Destination> destinations;
 
   @override
   Widget build(BuildContext context) {
@@ -33,25 +27,6 @@ class RootLayout extends StatelessWidget {
       color: Theme.of(context).scaffoldBackgroundColor,
       child: Row(
         children: [
-          Column(
-            children: [
-              Padding(
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                child: buildFab(context, elevated: false),
-              ),
-              Expanded(
-                child: NavigationRail(
-                  groupAlignment: 0,
-                  destinations: destinations
-                    .map((d) => d.toNavigationRailDestination())
-                    .toList(),
-                  selectedIndex: navigationIndex,
-                  labelType: NavigationRailLabelType.selected,
-                  onDestinationSelected: onDestination,
-                ),
-              )
-            ],
-          ),
           Expanded(child: Scaffold(body: child)),
         ],
       ),
@@ -60,65 +35,7 @@ class RootLayout extends StatelessWidget {
 
   Widget buildMobile(BuildContext context) {
     return Scaffold(
-      drawer: Drawer(
-        child: Column(
-          children: [
-            DrawerHeader(child: Image.asset('assets/images/logo.png')),
-            Expanded(
-              child: ListView.builder(
-                itemCount: destinations.length,
-                itemBuilder: (context, index) {
-                  final destination = destinations[index];
-                  final selected = index == navigationIndex;
-                  return ListTile(
-                    title: Text(destination.label),
-                    leading: Icon(
-                        selected ? destination.selectedIcon : destination.unselectedIcon
-                    ),
-                    selected: selected,
-                    onTap: () {
-                      onDestination(index);
-                      Navigator.pop(context);
-                    },
-                  );
-                },
-              ),
-            ),
-          ],
-        ),
-      ),
       body: child,
-      //floatingActionButton: buildFab(context),
     );
-  }
-
-  buildFab(BuildContext context, {bool elevated = true}) {
-    final router = GoRouterState.of(context);
-    if (router.uri.toString() != '/') {
-      return null;
-    } else {
-      return FloatingActionButton(
-        elevation: elevated ? null : 0,
-          child: const Icon(Icons.edit_outlined),
-          onPressed: () {}
-      );
-    }
-  }
-}
-
-class Destination {
-  final String label;
-  final IconData selectedIcon, unselectedIcon;
-
-  const Destination(
-      {required this.label,
-      required this.selectedIcon,
-      required this.unselectedIcon});
-
-  NavigationRailDestination toNavigationRailDestination() {
-    return NavigationRailDestination(
-        icon: Icon(unselectedIcon),
-        selectedIcon: Icon(selectedIcon),
-        label: Text(label));
   }
 }

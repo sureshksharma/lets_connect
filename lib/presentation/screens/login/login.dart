@@ -1,11 +1,15 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:lets_connect/data/repository/module.dart';
 import 'package:lets_connect/domain/listener.dart';
+import 'package:lets_connect/domain/model/user.dart';
 import 'package:lets_connect/presentation/widgets/viewUtils.dart';
 import '../../anim/FadeAnimation.dart';
 import 'login_provider.dart';
+import 'package:lets_connect/presentation/screens/home/user_provider.dart';
 
 class LoginScreen extends ConsumerWidget implements DataListener {
   LoginScreen({super.key});
@@ -19,10 +23,11 @@ class LoginScreen extends ConsumerWidget implements DataListener {
   Widget build(BuildContext context, WidgetRef ref) {
     final isVisible = ref.watch(visibleProvider);
     final authActions = ref.read(authActionsProvider);
-    final authStates = ref.watch(authStateChangesProvider);
+    final userProvider = ref.read(authUserProvider.notifier);
     return Scaffold(
       key: _scaffoldKey,
       body: Container(
+        key: const Key('loginScreen'),
         width: double.infinity,
         decoration: const BoxDecoration(
             gradient: LinearGradient(
@@ -82,6 +87,7 @@ class LoginScreen extends ConsumerWidget implements DataListener {
                                       border: Border(bottom: BorderSide(color: Colors.grey[200]!))
                                   ),
                                   child: TextFormField(
+                                    key: const Key('emailField'),
                                     controller: emailController,
                                     keyboardType: TextInputType.emailAddress,
                                     textInputAction: TextInputAction.next,
@@ -104,6 +110,7 @@ class LoginScreen extends ConsumerWidget implements DataListener {
                                       border: Border(bottom: BorderSide(color: Colors.grey[200]!))
                                   ),
                                   child: TextFormField(
+                                    key: const Key('passwordField'),
                                     controller: passController,
                                     obscureText: !isVisible,
                                     keyboardType: TextInputType.text,
@@ -130,13 +137,18 @@ class LoginScreen extends ConsumerWidget implements DataListener {
                             ),
                           ),
                         )),
-                        const SizedBox(height: 40,),
-                        FadeAnimation(delay: 1.5, child: TextButton(onPressed: () {}, child: const Text("Forgot Password?"),),),
+                        // const SizedBox(height: 40,),
+                        // FadeAnimation(delay: 1.5, child: TextButton(onPressed: () {}, child: const Text("Forgot Password?"),),),
                         const SizedBox(height: 40,),
                         FadeAnimation(delay: 1.6, child: ElevatedButton(
+                          key: const Key('loginButton'),
                           onPressed: () async {
                             if(_formKey.currentState!.validate()) {
-                              authActions.signInWithEmailAndPassword(emailController.text, passController.text, this);
+                              final userDetail = await authActions.signInWithEmailAndPassword(emailController.text, passController.text, this);
+                              if(userDetail != null) {
+                                userProvider.getUser(userDetail);
+                                moveToHome();
+                              }
                             }
                           },
                           child: const Text('Login'),
@@ -146,9 +158,12 @@ class LoginScreen extends ConsumerWidget implements DataListener {
                           mainAxisAlignment: MainAxisAlignment.center,
                           children: [
                             const Text("Don't have account? "),
-                            TextButton(onPressed: () {
+                            TextButton(
+                              key: const Key('registerButton'),
+                                onPressed: () {
                               context.push('/register');
-                            }, child: const Text("Register here")),
+                            }, child: const Text("Register here")
+                            ),
                           ],
                         )),
                       ],
@@ -161,6 +176,10 @@ class LoginScreen extends ConsumerWidget implements DataListener {
         ),
       ),
     );
+  }
+
+  void moveToHome() {
+    _scaffoldKey.currentContext!.push('/home');
   }
 
   @override
@@ -179,6 +198,5 @@ class LoginScreen extends ConsumerWidget implements DataListener {
   @override
   void onSuccess() {
     _scaffoldKey.currentContext!.hideDialog();
-    _scaffoldKey.currentContext!.push('/home');
   }
 }

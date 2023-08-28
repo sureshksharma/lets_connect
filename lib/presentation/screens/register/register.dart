@@ -24,6 +24,7 @@ class RegisterScreen extends ConsumerWidget implements DataListener {
     return Scaffold(
       key: _scaffoldKey,
       body: Container(
+        key: const Key('registrationScreen'),
         width: double.infinity,
         decoration: const BoxDecoration(
             gradient: LinearGradient(
